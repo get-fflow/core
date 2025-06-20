@@ -1,0 +1,144 @@
+name: BDD Checks
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'features/**'
+      - 'cucumber.js'
+      - '**/*.feature'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'features/**'
+      - 'cucumber.js'
+      - '**/*.feature'
+
+jobs:
+  feature-validation:
+    name: Feature File Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Validate feature files syntax
+      run: npm run test:dry-run
+    
+    - name: Check feature file naming
+      run: |
+        # Ensure all feature files follow naming convention
+        find features -name "*.feature" | while read -r file; do
+          basename=$(basename "$file")
+          if ! echo "$basename" | grep -qE "^[a-z][a-z0-9_-]*\.feature$"; then
+            echo "Error: Feature file '$file' does not follow naming convention"
+            echo "Expected: lowercase with underscores or hyphens"
+            exit 1
+          fi
+        done
+    
+    - name: Check for undefined steps
+      run: |
+        # Run tests and capture output
+        output=$(npm test 2>&1 || true)
+        
+        # Check for undefined steps
+        if echo "$output" | grep -q "undefined"; then
+          echo "Error: Found undefined steps in feature files"
+          echo "$output" | grep -A2 -B2 "undefined"
+          exit 1
+        fi
+    
+    - name: Validate step definitions
+      run: |
+        # Check that all step definitions follow conventions
+        find features/step_definitions -name "*.js" | while read -r file; do
+          # Check for proper Given/When/Then imports
+          if ! grep -q "import.*{.*Given.*When.*Then.*}.*from.*cucumber" "$file"; then
+            echo "Warning: $file may not properly import Given/When/Then"
+          fi
+        done
+
+  scenario-coverage:
+    name: Scenario Coverage Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Generate coverage report
+      run: |
+        # Create reports directory
+        mkdir -p reports
+        
+        # Run tests with JSON report
+        npm test -- --format json:reports/cucumber_report.json || true
+        
+        # Count scenarios and steps
+        if [ -f reports/cucumber_report.json ]; then
+          scenarios=$(jq '[.[] | .elements | length] | add' reports/cucumber_report.json)
+          passed=$(jq '[.[] | .elements[] | select(.status == "passed")] | length' reports/cucumber_report.json)
+          echo "Total scenarios: $scenarios"
+          echo "Passed scenarios: $passed"
+          
+          # Ensure we have good coverage
+          if [ "$scenarios" -lt 3 ]; then
+            echo "Warning: Only $scenarios scenarios found. Consider adding more test coverage."
+          fi
+        fi
+    
+    - name: Check for test tags
+      run: |
+        # Check if features use tags for organization
+        tag_count=$(grep -h "^@" features/*.feature | wc -l)
+        if [ "$tag_count" -eq 0 ]; then
+          echo "Info: No tags found in feature files. Consider using tags for test organization."
+          echo "Example: @smoke, @regression, @critical"
+        fi
+
+  parallel-execution:
+    name: Parallel Execution Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Test parallel execution
+      run: |
+        echo "Testing parallel execution capability..."
+        npm run test:parallel
+        
+        # Verify parallel execution worked
+        if [ $? -eq 0 ]; then
+          echo "✓ Parallel execution successful"
+        else
+          echo "✗ Parallel execution failed"
+          exit 1
+        fi
