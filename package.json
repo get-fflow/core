@@ -30,6 +30,9 @@
     "url": "https://github.com/get-fflow/core/issues"
   },
   "homepage": "https://github.com/get-fflow/core#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@cucumber/cucumber": "^11.1.0",
     "@semantic-release/changelog": "^6.0.3",
