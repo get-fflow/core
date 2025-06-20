@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/get-fflow/core/compare/v1.0.0...v1.1.0) (2025-06-20)
+
+
+### Features
+
+* npm publish public ([3805c84](https://github.com/get-fflow/core/commit/3805c848fb4db9cae43d207abec480e35cd08944))
+
 # 1.0.0 (2025-06-20)
 
 
