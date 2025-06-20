@@ -1,0 +1,45 @@
+{
+  "name": "@fflow/core",
+  "version": "1.0.0",
+  "description": "Core BDD testing package for fflow - Behavior-Driven Development tests in JavaScript",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "cucumber-js",
+    "test:watch": "cucumber-js --watch",
+    "test:tags": "cucumber-js --tags",
+    "test:dry-run": "cucumber-js --dry-run",
+    "test:parallel": "cucumber-js --parallel 2",
+    "report": "mkdir -p reports && cucumber-js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/get-fflow/core.git"
+  },
+  "keywords": [
+    "bdd",
+    "testing",
+    "cucumber",
+    "fflow",
+    "behavior-driven-development",
+    "gherkin"
+  ],
+  "author": "fflow team",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/get-fflow/core/issues"
+  },
+  "homepage": "https://github.com/get-fflow/core#readme",
+  "devDependencies": {
+    "@cucumber/cucumber": "^11.1.0",
+    "chai": "^5.1.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "files": [
+    "index.js",
+    "features/",
+    "cucumber.mjs"
+  ]
+}

@@ -1,0 +1,136 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run tests
+      run: npm test
+    
+    - name: Run dry-run validation
+      run: npm run test:dry-run
+    
+    - name: Upload test reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-reports-${{ matrix.node-version }}
+        path: reports/
+        retention-days: 7
+
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Check for dependency vulnerabilities
+      run: npm audit --audit-level=moderate
+    
+    - name: Validate package.json
+      run: |
+        npm run test:dry-run
+        # Ensure package name follows scope convention
+        if ! grep -q '"name": "@fflow/core"' package.json; then
+          echo "Error: Package name must be @fflow/core"
+          exit 1
+        fi
+
+  pr-validation:
+    name: PR Validation
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Validate PR title
+      env:
+        PR_TITLE: ${{ github.event.pull_request.title }}
+      run: |
+        # Check if PR title follows conventional commits
+        pattern="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .+"
+        if ! echo "$PR_TITLE" | grep -qE "$pattern"; then
+          echo "Error: PR title does not follow conventional commits format"
+          echo "Title: $PR_TITLE"
+          echo "Expected format: type(scope)?: description"
+          exit 1
+        fi
+    
+    - name: Check PR description
+      env:
+        PR_BODY: ${{ github.event.pull_request.body }}
+      run: |
+        # Check for Linear closing tags in PR description
+        if ! echo "$PR_BODY" | grep -qE "(Closes|Fixes|Resolves) FFL-[0-9]+"; then
+          echo "Warning: No Linear issue closing tags found in PR description"
+          echo "Add 'Closes FFL-XXX' to automatically close Linear issues"
+        fi
+
+  publish-ready:
+    name: Publish Readiness
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+    
+    - name: Check package files
+      run: |
+        # Ensure all required files exist
+        required_files=("README.MD" "CHANGELOG.md" "LICENSE" "index.js" "package.json")
+        for file in "${required_files[@]}"; do
+          if [ ! -f "$file" ]; then
+            echo "Error: Required file $file is missing"
+            exit 1
+          fi
+        done
+    
+    - name: Validate npm package
+      run: |
+        # Check what files would be published
+        npm pack --dry-run
+        
+        # Ensure package size is reasonable (< 1MB)
+        size=$(npm pack --dry-run 2>&1 | grep "package size:" | awk '{print $3}' | sed 's/[^0-9.]//g')
+        if (( $(echo "$size > 1" | bc -l) )); then
+          echo "Warning: Package size ($size MB) is larger than recommended"
+        fi
