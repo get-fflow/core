@@ -1,3 +1,15 @@
+# 1.0.0 (2025-06-20)
+
+
+### Bug Fixes
+
+* **ci:** grant write permissions to release job ([#9](https://github.com/get-fflow/core/issues/9)) ([37565d3](https://github.com/get-fflow/core/commit/37565d3792b395a187ca6f37ca0cd251356c330a))
+
+
+### Features
+
+* MEP (FFL-11) ([#6](https://github.com/get-fflow/core/issues/6)) ([8ffa309](https://github.com/get-fflow/core/commit/8ffa3092c9d55840ac96db2fc022dce6b80d4bba)), closes [#1](https://github.com/get-fflow/core/issues/1) [#3](https://github.com/get-fflow/core/issues/3) [#4](https://github.com/get-fflow/core/issues/4) [#5](https://github.com/get-fflow/core/issues/5)
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
