@@ -40,6 +40,6 @@
   "files": [
     "index.js",
     "features/",
-    "cucumber.js"
+    "cucumber.mjs"
   ]
 }
