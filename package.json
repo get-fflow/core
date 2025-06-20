@@ -1,5 +1,5 @@
 {
-  "name": "@-fflow/core",
+  "name": "@fflow/core",
   "version": "1.0.0",
   "description": "Core BDD testing package for fflow - Behavior-Driven Development tests in JavaScript",
   "type": "module",
