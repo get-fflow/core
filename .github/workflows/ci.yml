@@ -64,8 +64,8 @@ jobs:
       run: |
         npm run test:dry-run
         # Ensure package name follows scope convention
-        if ! grep -q '"name": "@fflow/core"' package.json; then
-          echo "Error: Package name must be @fflow/core"
+        if ! grep -q '"name": "@-fflow/core"' package.json; then
+          echo "Error: Package name must be @-fflow/core"
           exit 1
         fi
 

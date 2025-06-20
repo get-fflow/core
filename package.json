@@ -1,5 +1,5 @@
 {
-  "name": "@fflow/core",
+  "name": "@-fflow/core",
   "version": "1.0.0",
   "description": "Core BDD testing package for fflow - Behavior-Driven Development tests in JavaScript",
   "type": "module",
@@ -32,7 +32,12 @@
   "homepage": "https://github.com/get-fflow/core#readme",
   "devDependencies": {
     "@cucumber/cucumber": "^11.1.0",
-    "chai": "^5.1.2"
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/npm": "^12.0.1",
+    "chai": "^5.1.2",
+    "conventional-changelog-conventionalcommits": "^9.0.0",
+    "semantic-release": "^24.2.5"
   },
   "engines": {
     "node": ">=14.0.0"
