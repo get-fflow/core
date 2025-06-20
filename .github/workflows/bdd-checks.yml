@@ -63,7 +63,7 @@ jobs:
         # Check that all step definitions follow conventions
         find features/step_definitions -name "*.js" | while read -r file; do
           # Check for proper Given/When/Then imports
-          if ! grep -q "const.*{.*Given.*When.*Then.*}.*require.*cucumber" "$file"; then
+          if ! grep -q "import.*{.*Given.*When.*Then.*}.*from.*cucumber" "$file"; then
             echo "Warning: $file may not properly import Given/When/Then"
           fi
         done
